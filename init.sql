@@ -44,34 +44,26 @@ CREATE TABLE Connection
 );
 
 INSERT INTO Country (Name, Code)
-VALUES ('United States', 'US'),
-       ('Canada', 'CA'),
-       ('Mexico', 'MX');
+VALUES ('Россия', 'RU');
 
 INSERT INTO City (Name, Region)
-VALUES ('New York', 'New York'),
-       ('Los Angeles', 'California'),
-       ('Toronto', 'Ontario'),
-       ('Vancouver', 'British Columbia'),
-       ('Mexico City', 'Mexico City');
+VALUES ('Москва', 'Москва'),
+       ('Санкт-Петербург', 'Санкт-Петербург');
 
 INSERT INTO Station (Name, CityName, Region)
-VALUES ('Grand Central', 'New York', 'New York'),
-       ('Union Station', 'Los Angeles', 'California'),
-       ('Union Station', 'Toronto', 'Ontario'),
-       ('Pacific Central', 'Vancouver', 'British Columbia'),
-       ('Tacubaya', 'Mexico City', 'Mexico City');
+VALUES ('Москва Центральная', 'Москва', 'Москва'),
+       ('Санкт-Петербург Главный', 'Санкт-Петербург', 'Санкт-Петербург');
 
 INSERT INTO Train (TrainNr, TrainType, Capacity)
-VALUES (101, 'Express', 300),
-       (102, 'Local', 150),
-       (103, 'Intercity', 200);
+VALUES (101, 'Экспресс', 300),
+       (102, 'Региональный', 150),
+       (103, 'Междугородний', 200);
 
 INSERT INTO Connection (FromStation, ToStation, TrainNr, Departure, Arrival, CityNameFrom, CityNameTo, RegionFrom,
                         RegionTo)
-VALUES ('Grand Central', 'Union Station', 101, '2024-10-08 08:00:00', '2024-10-08 11:00:00', 'New York', 'Los Angeles',
-        'New York', 'California'),
-       ('Union Station', 'Pacific Central', 102, '2024-10-08 09:00:00', '2024-10-08 12:00:00', 'Los Angeles',
-        'Vancouver', 'California', 'British Columbia'),
-       ('Union Station', 'Tacubaya', 103, '2024-10-08 10:00:00', '2024-10-08 12:30:00', 'Toronto', 'Mexico City',
-        'Ontario', 'Mexico City');
+VALUES ('Москва Центральная', 'Санкт-Петербург Главный', 101, '2024-10-08 08:00:00', '2024-10-08 11:00:00', 'Москва', 'Санкт-Петербург',
+        'Москва', 'Санкт-Петербург'),
+       ('Санкт-Петербург Главный', 'Москва Центральная', 102, '2024-10-08 09:00:00', '2024-10-08 12:00:00', 'Санкт-Петербург',
+        'Москва', 'Санкт-Петербург', 'Москва'),
+       ('Москва Центральная', 'Санкт-Петербург Главный', 103, '2024-10-08 10:00:00', '2024-10-08 12:30:00', 'Москва', 'Санкт-Петербург',
+        'Москва', 'Санкт-Петербург');
