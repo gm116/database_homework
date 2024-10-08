@@ -1,117 +1,77 @@
-CREATE TABLE Reader
+CREATE TABLE Country
 (
-    ID        SERIAL PRIMARY KEY,
-    LastName  VARCHAR(100) NOT NULL,
-    FirstName VARCHAR(100) NOT NULL,
-    Address   VARCHAR(255),
-    BirthDate DATE
+    Name VARCHAR(100) PRIMARY KEY,
+    Code VARCHAR(10) NOT NULL
 );
 
-CREATE TABLE Publisher
+CREATE TABLE City
 (
-    PubName    VARCHAR(255) PRIMARY KEY,
-    PubAddress VARCHAR(255)
+    Name   VARCHAR(100) NOT NULL,
+    Region VARCHAR(100) NOT NULL,
+    PRIMARY KEY (Name, Region)
 );
 
-CREATE TABLE Book
+CREATE TABLE Station
 (
-    ISBN     CHAR(13) PRIMARY KEY,
-    Title    VARCHAR(255) NOT NULL,
-    Author   VARCHAR(255) NOT NULL,
-    PagesNum INT,
-    PubYear  INT,
-    PubName  VARCHAR(255) NOT NULL,
-    FOREIGN KEY (PubName) REFERENCES Publisher (PubName)
+    Name     VARCHAR(100),
+    CityName VARCHAR(100),
+    Region   VARCHAR(100),
+    PRIMARY KEY (Name, CityName, Region)
 );
 
-
-CREATE TABLE Category
+CREATE TABLE Train
 (
-    CategoryName VARCHAR(100) PRIMARY KEY,
-    ParentCat    VARCHAR(100),
-    FOREIGN KEY (ParentCat) REFERENCES Category (CategoryName)
+    TrainNr   INT PRIMARY KEY,
+    TrainType VARCHAR(100),
+    Capacity  INT
 );
 
-CREATE TABLE BookCopy
+CREATE TABLE Connection
 (
-    ISBN          CHAR(13),
-    CopyNumber    INT,
-    ShelfPosition VARCHAR(100),
-    PRIMARY KEY (ISBN, CopyNumber),
-    FOREIGN KEY (ISBN) REFERENCES Book (ISBN)
+    FromStation  VARCHAR(100),
+    ToStation    VARCHAR(100),
+    TrainNr      INT,
+    Departure    TIMESTAMP,
+    Arrival      TIMESTAMP,
+    CityNameFrom VARCHAR(100),
+    CityNameTo   VARCHAR(100),
+    RegionFrom   VARCHAR(100),
+    RegionTo     VARCHAR(100),
+    PRIMARY KEY (FromStation, ToStation, TrainNr, Departure),
+    FOREIGN KEY (FromStation, CityNameFrom, RegionFrom) REFERENCES Station (Name, CityName, Region),
+    FOREIGN KEY (ToStation, CityNameTo, RegionTo) REFERENCES Station (Name, CityName, Region),
+    FOREIGN KEY (TrainNr) REFERENCES Train (TrainNr)
 );
 
-CREATE TABLE Borrowing
-(
-    ReaderNr   INT,
-    ISBN       CHAR(13),
-    CopyNumber INT,
-    ReturnDate DATE,
-    PRIMARY KEY (ReaderNr, ISBN, CopyNumber),
-    FOREIGN KEY (ReaderNr) REFERENCES Reader (ID),
-    FOREIGN KEY (ISBN, CopyNumber) REFERENCES BookCopy (ISBN, CopyNumber)
-);
+INSERT INTO Country (Name, Code)
+VALUES ('United States', 'US'),
+       ('Canada', 'CA'),
+       ('Mexico', 'MX');
 
+INSERT INTO City (Name, Region)
+VALUES ('New York', 'New York'),
+       ('Los Angeles', 'California'),
+       ('Toronto', 'Ontario'),
+       ('Vancouver', 'British Columbia'),
+       ('Mexico City', 'Mexico City');
 
-CREATE TABLE BookCat
-(
-    ISBN         CHAR(13),
-    CategoryName VARCHAR(100),
-    PRIMARY KEY (ISBN, CategoryName),
-    FOREIGN KEY (ISBN) REFERENCES Book (ISBN),
-    FOREIGN KEY (CategoryName) REFERENCES Category (CategoryName)
-);
+INSERT INTO Station (Name, CityName, Region)
+VALUES ('Grand Central', 'New York', 'New York'),
+       ('Union Station', 'Los Angeles', 'California'),
+       ('Union Station', 'Toronto', 'Ontario'),
+       ('Pacific Central', 'Vancouver', 'British Columbia'),
+       ('Tacubaya', 'Mexico City', 'Mexico City');
 
+INSERT INTO Train (TrainNr, TrainType, Capacity)
+VALUES (101, 'Express', 300),
+       (102, 'Local', 150),
+       (103, 'Intercity', 200);
 
---------------------------------------------------------------------
--- Заполним данные
-
--- Данные для таблицы Reader
-INSERT INTO Reader (LastName, FirstName, Address, BirthDate)
-VALUES ('Иванов', 'Иван', 'Москва', '1985-06-15'),
-       ('Петров', 'Петр', 'Москва', '1990-04-21'),
-       ('Сидоров', 'Сидор', 'Санкт-Петербург', '1978-11-30'),
-       ('Андреев', 'Андрей', 'Москва', '1995-03-10');
-
--- Данные для таблицы Publisher
-INSERT INTO Publisher (PubName, PubAddress)
-VALUES ('Эксмо', 'Москва'),
-       ('АСТ', 'Москва'),
-       ('Питер', 'Санкт-Петербург');
-
--- Данные для таблицы Book
-INSERT INTO Book (ISBN, Title, Author, PagesNum, PubYear, PubName)
-VALUES ('9781234567897', 'Путешествие на горы', 'Автор 1', 300, 2015, 'Эксмо'),
-       ('9781234567898', 'Путеводитель по горам', 'Автор 2', 350, 2016, 'АСТ'),
-       ('9781234567899', 'Горы и приключения', 'Автор 3', 400, 2017, 'Питер'),
-       ('9781234567900', 'Жизнь в горах', 'Автор 4', 280, 2018, 'Эксмо'),
-       ('9781234567901', 'Путешествия по миру', 'Автор 5', 500, 2019, 'АСТ');
-
--- Данные для таблицы Category
-INSERT INTO Category (CategoryName, ParentCat)
-VALUES ('Горы', NULL),
-       ('Путешествия', NULL);
-
--- Данные для таблицы BookCopy
-INSERT INTO BookCopy (ISBN, CopyNumber, ShelfPosition)
-VALUES ('9781234567897', 1, 'A1'),
-       ('9781234567898', 1, 'A2'),
-       ('9781234567899', 1, 'A3'),
-       ('9781234567900', 1, 'A4'),
-       ('9781234567901', 1, 'A5');
-
--- Данные для таблицы Borrowing
-INSERT INTO Borrowing (ReaderNr, ISBN, CopyNumber, ReturnDate)
-VALUES (1, '9781234567897', 1, '2024-10-01'),
-       (1, '9781234567899', 1, '2024-10-01'),
-       (2, '9781234567898', 1, NULL),
-       (3, '9781234567900', 1, '2024-10-05'),
-       (4, '9781234567901', 1, NULL);
-
--- Данные для таблицы BookCat
-INSERT INTO BookCat (ISBN, CategoryName)
-VALUES ('9781234567897', 'Горы'),
-       ('9781234567898', 'Горы'),
-       ('9781234567899', 'Горы'),
-       ('9781234567900', 'Горы'),
-       ('9781234567901', 'Путешествия');
+INSERT INTO Connection (FromStation, ToStation, TrainNr, Departure, Arrival, CityNameFrom, CityNameTo, RegionFrom,
+                        RegionTo)
+VALUES ('Grand Central', 'Union Station', 101, '2024-10-08 08:00:00', '2024-10-08 11:00:00', 'New York', 'Los Angeles',
+        'New York', 'California'),
+       ('Union Station', 'Pacific Central', 102, '2024-10-08 09:00:00', '2024-10-08 12:00:00', 'Los Angeles',
+        'Vancouver', 'California', 'British Columbia'),
+       ('Union Station', 'Tacubaya', 103, '2024-10-08 10:00:00', '2024-10-08 12:30:00', 'Toronto', 'Mexico City',
+        'Ontario', 'Mexico City');
