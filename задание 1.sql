@@ -1,41 +1,68 @@
--- а) Какие фамилии читателей в Москве?
-SELECT LastName
-FROM Reader
-WHERE Address = 'Москва';
+-- 1. Показать все названия книг вместе с именами издателей
+SELECT Title, PubName
+FROM Book;
 
--- б) Какие книги (author, title) брал Иван Иванов?
-SELECT Book.Author, Book.Title
-FROM Borrowing
-         JOIN Reader ON Borrowing.ReaderNr = Reader.ID
-         JOIN Book ON Borrowing.ISBN = Book.ISBN
-WHERE Reader.LastName = 'Иванов' AND Reader.FirstName = 'Иван';
+-- 2. В какой книге наибольшее количество страниц
+SELECT Title, PagesNum
+FROM Book
+ORDER BY PagesNum DESC
+LIMIT 1;
 
--- в) Какие книги (ISBN) из категории "Горы" не относятся к категории "Путешествия"?
-SELECT bc.ISBN
-FROM BookCat bc
-         JOIN Category c ON bc.CategoryName = c.CategoryName
-WHERE c.CategoryName = 'Горы'
-  AND bc.ISBN NOT IN (
-    SELECT bc2.ISBN
-    FROM BookCat bc2
-    WHERE bc2.CategoryName = 'Путешествия'
-);
+-- 3. Какие авторы написали более 5 книг
+SELECT Author
+FROM Book
+GROUP BY Author
+HAVING COUNT(DISTINCT isbn) > 5;
 
--- г) Какие читатели (LastName, FirstName) вернули копию книги?
-SELECT Reader.LastName, Reader.FirstName
-FROM Borrowing
-         JOIN Reader ON Borrowing.ReaderNr = Reader.ID
-WHERE Borrowing.ReturnDate IS NOT NULL;
 
--- д) Какие читатели (LastName, FirstName) брали хотя бы одну книгу (не копию), которую брал также Иван Иванов (не включайте Ивана Иванова в результат)?
+-- 4. В каких книгах более чем в два раза больше страниц, чем среднее количество страниц для всех книг
+SELECT Title, PagesNum
+FROM Book
+WHERE PagesNum > (SELECT AVG(PagesNum) * 2 FROM Book);
 
+-- 5. Какие категории содержат подкатегории
+SELECT DISTINCT c1.CategoryName
+FROM Category c1
+         JOIN Category c2 ON c1.CategoryName = c2.ParentCat;
+
+-- 6. У какого автора написано максимальное количество книг
+SELECT Author, COUNT(isbn) AS BookCount
+FROM Book
+GROUP BY Author
+ORDER BY BookCount DESC
+LIMIT 1;
+
+-- 7. Какие читатели забронировали все книги, написанные "Марком Твеном"
 SELECT DISTINCT r.LastName, r.FirstName
-FROM Borrowing b
-         JOIN Reader r ON b.ReaderNr = r.ID
-WHERE b.ISBN IN (
-    SELECT b2.ISBN
-    FROM Borrowing b2
-             JOIN Reader r2 ON b2.ReaderNr = r2.ID
-    WHERE r2.LastName = 'Иванов' AND r2.FirstName = 'Иван'
+FROM Reader r
+         JOIN Borrow b ON r.number = b.ReaderNumber
+         JOIN Book k ON b.ISBN = k.isbn
+WHERE k.Author = 'Mark Twain'
+GROUP BY r.number
+HAVING COUNT(DISTINCT k.isbn) = (SELECT COUNT(*) FROM Book WHERE Author = 'Mark Twain');
+
+-- 8. Какие книги имеют более одной копии
+SELECT Title, COUNT(CopyNumber) AS CopyCount
+FROM Book b
+         JOIN Copy c ON b.isbn = c.ISBN
+GROUP BY Title
+HAVING COUNT(CopyNumber) > 1;
+
+-- 9. ТОП 10 самых старых книг
+SELECT Title, PubYear
+FROM Book
+ORDER BY PubYear
+LIMIT 10;
+
+-- 10. Перечислите все категории в категории “Спорт” (с любым уровнем вложенности)
+WITH RECURSIVE Subcategories AS (
+    SELECT CategoryName
+    FROM Category
+    WHERE CategoryName = 'Sport'
+    UNION ALL
+    SELECT c.CategoryName
+    FROM Category c
+             JOIN Subcategories sc ON c.ParentCat = sc.CategoryName
 )
-  AND r.LastName <> 'Иванов' AND r.FirstName <> 'Иван';
+SELECT CategoryName
+FROM Subcategories;
