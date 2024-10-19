@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: student
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5444:5432"
+
+volumes:
+  pg_data:
